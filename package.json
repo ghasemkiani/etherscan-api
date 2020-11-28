@@ -1,6 +1,6 @@
 {
   "name": "@ghasemkiani/etherscan-api",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "An API client for etherscan.io",
   "main": "index.js",
   "scripts": {
@@ -27,6 +27,7 @@
   "homepage": "https://gitlab.com/ghasemkiani/etherscan-api#readme",
   "dependencies": {
     "@ghasemkiani/commonbase": "github:ghasemkiani/commonbase",
+    "async-disk-cache": "^2.1.0",
     "isomorphic-fetch": "^3.0.0"
   }
 }
