@@ -18,14 +18,16 @@ class Client extends Base {
 	set apiKeyToken(apiKeyToken) {
 		this._apiKeyToken = apiKeyToken;
 	}
+	// singleton
+	static _cache = null;
 	get cache() {
-		if(!this._cache) {
-			this._cache = new Cache(this.cacheName);
+		if(!this.constructor._cache) {
+			this.constructor._cache = new Cache(this.cacheName);
 		}
-		return this._cache;
+		return this.constructor._cache;
 	}
 	set cache(cache) {
-		this._cache = null;
+		this.constructor._cache = null;
 	}
 	async toFetch(module, action, params) {
 		params = Object(params);
@@ -70,6 +72,15 @@ class Client extends Base {
 		let abi = JSON.parse(sabi);
 		return abi;
 	}
+	async toRemoveContractAbiFromCache(address) {
+		let result = false;
+		let key = address;
+		try {
+			await this.cache.remove(key);
+			result = true;
+		} catch(e) {}
+		return result;
+	}
 }
 cutil.extend(Client.prototype, {
 	endpoint: "https://api.etherscan.io/api",
@@ -77,7 +88,7 @@ cutil.extend(Client.prototype, {
 	_apiKeyToken: null,
 	useCache: true,
 	cacheName: "etherscan",
-	_cache: null,
+	// _cache: null,
 });
 
 module.exports = {Client};
