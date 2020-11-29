@@ -51,12 +51,14 @@ class Client extends Base {
 		let saveCache = false;
 		let key = address;
 		if(this.useCache) {
-			let cacheEntry = await this.cache.get(key);
-			if(cacheEntry.isCached) {
-				sabi = cacheEntry.value;
-			} else {
-				saveCache = true;
-			}
+			try {
+				let cacheEntry = await this.cache.get(key);
+				if(cacheEntry && cacheEntry.isCached && cacheEntry.value) {
+					sabi = cacheEntry.value;
+				} else {
+					saveCache = true;
+				}
+			} catch(e) {}
 		}
 		if(!sabi) {
 			let json = await this.toGet("contract", "getabi", {address});
