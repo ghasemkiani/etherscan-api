@@ -2,6 +2,7 @@
 
 const fetch = require("isomorphic-fetch");
 const Cache = require("async-disk-cache");
+const abiDecoder = require("abi-decoder");
 
 const {cutil} = require("@ghasemkiani/commonbase/cutil");
 const {Base} = require("@ghasemkiani/commonbase/base");
@@ -48,10 +49,64 @@ class Client extends Base {
 		let json = await this.toGet("account", "txlist", {address, startblock, endblock, sort});
 		return json;
 	}
+	get addedAbisMap() {
+		if(!this._addedAbisMap) {
+			this._addedAbisMap = {};
+		}
+		return this._addedAbisMap;
+	}
+	set addedAbisMap(addedAbisMap) {
+		this._addedAbisMap = addedAbisMap;
+	}
+	async toListTxs(arg) {
+		arg = Object.assign({
+			address: null,
+			startblock: 0,
+			endblock: 999999999,
+			sort: "desc",
+			decode: true,
+			toProcessTx: null,
+			logErrors: false,
+		}, arg);
+		let {address, startblock, endblock, sort, decode, toProcessTx, logErrors} = arg;
+		let {status, message, result: txs} = await this.toListTransactions(address, startblock, endblock, sort);
+		if(!status) {
+			throw new Error(message);
+		}
+		if(decode) {
+			for(let tx of txs) {
+				let {input} = tx;
+				if(input !== "0x") {
+					try {
+						let {to: address} = tx;
+						if(!this.addedAbisMap[address]) {
+							let abi = await this.toGetContractAbi(address);
+							abiDecoder.addABI(abi);
+							this.addedAbisMap[address] = true;
+						}
+						tx.decodedData = abiDecoder.decodeMethod(tx.input);
+						let params = tx.decodedData.params;
+						tx.decodedData.paramsObj = params.reduce(((obj, {name, value}) => ((obj[name] = value), obj)), {});
+					} catch(e) {
+						if(logErrors) {
+							console.log(`${e.message}\n${JSON.stringify(tx)}`);
+						}
+					}
+				}
+				if(toProcessTx) {
+					await toProcessTx(tx);
+				}
+			}
+		}
+		return txs;
+	}
+	getCacheKey(address) {
+		return cutil.asString(address).toLowerCase();
+	}
 	async toGetContractAbi(address) {
 		let sabi = null;
 		let saveCache = false;
-		let key = address;
+		let key = this.getCacheKey(address);
 		if(this.useCache) {
 			try {
 				let cacheEntry = await this.cache.get(key);
@@ -65,16 +120,20 @@ class Client extends Base {
 		if(!sabi) {
 			let json = await this.toGet("contract", "getabi", {address});
 			sabi = json.result;
-			if(saveCache) {
-				await this.cache.set(key, sabi);
-			}
 		}
 		let abi = JSON.parse(sabi);
+		if(saveCache) {
+			await this.cache.set(key, sabi);
+		}
 		return abi;
+	}
+	async toSaveContractAbiToCache(address, sabi) {
+		let key = this.getCacheKey(address);
+		await this.cache.set(key, sabi);
 	}
 	async toRemoveContractAbiFromCache(address) {
 		let result = false;
-		let key = address;
+		let key = this.getCacheKey(address);
 		try {
 			await this.cache.remove(key);
 			result = true;
@@ -89,6 +148,7 @@ cutil.extend(Client.prototype, {
 	useCache: true,
 	cacheName: "etherscan",
 	// _cache: null,
+	_addedAbisMap: null,
 });
 
 module.exports = {Client};
