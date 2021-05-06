@@ -4,8 +4,8 @@ const fetch = require("isomorphic-fetch");
 const Cache = require("async-disk-cache");
 const abiDecoder = require("abi-decoder");
 
-const {cutil} = require("@ghasemkiani/commonbase/cutil");
-const {Base} = require("@ghasemkiani/commonbase/base");
+const {cutil} = require("@ghasemkiani/base/cutil");
+const {Obj: Base} = require("@ghasemkiani/base/obj");
 
 class Client extends Base {
 	get apiKeyToken() {
