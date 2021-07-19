@@ -103,7 +103,7 @@ class Client extends Base {
 	getCacheKey(address) {
 		return cutil.asString(address).toLowerCase();
 	}
-	async toGetContractAbi(address) {
+	async toGetContractAbi(address, logError = false) {
 		let sabi = null;
 		let saveCache = false;
 		let key = this.getCacheKey(address);
@@ -121,7 +121,16 @@ class Client extends Base {
 			let json = await this.toGet("contract", "getabi", {address});
 			sabi = json.result;
 		}
-		let abi = JSON.parse(sabi);
+		let abi;
+		try {
+			abi = JSON.parse(sabi);
+		} catch(e) {
+			if (logError) {
+				console.log(`Error in retrieving abi for address: ${address}`);
+				console.log(sabi);
+			}
+			throw e;
+		}
 		if(saveCache) {
 			await this.cache.set(key, sabi);
 		}
