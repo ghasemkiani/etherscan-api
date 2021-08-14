@@ -1,13 +1,13 @@
 //	@ghasemkiani/etherscan-api/client
 
-const fetch = require("isomorphic-fetch");
-const Cache = require("async-disk-cache");
-const abiDecoder = require("abi-decoder");
+import fetch from "isomorphic-fetch";
+import Cache from "async-disk-cache";
+import abiDecoder from "abi-decoder";
 
-const {cutil} = require("@ghasemkiani/base/cutil");
-const {Obj: Base} = require("@ghasemkiani/base/obj");
+import {cutil} from "@ghasemkiani/base";
+import {Obj} from "@ghasemkiani/base";
 
-class Client extends Base {
+class Client extends Obj {
 	get apiKeyToken() {
 		if(!this._apiKeyToken) {
 			if(this.apiKeyTokenEnvName) {
@@ -47,6 +47,10 @@ class Client extends Base {
 	}
 	async toListTransactions(address, startblock = 0, endblock = 999999999, sort = "desc") {
 		let json = await this.toGet("account", "txlist", {address, startblock, endblock, sort});
+		return json;
+	}
+	async toListInternalTransactions(address, startblock = 0, endblock = 999999999, sort = "desc") {
+		let json = await this.toGet("account", "txlistinternal", {address, startblock, endblock, sort});
 		return json;
 	}
 	get addedAbisMap() {
@@ -160,6 +164,6 @@ cutil.extend(Client.prototype, {
 	_addedAbisMap: null,
 });
 
-module.exports = {Client};
+export {Client};
 
 // https://api.etherscan.io/apis

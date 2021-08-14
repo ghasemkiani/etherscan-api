@@ -1,5 +1,5 @@
 //	@ghasemkiani/etherscan-api
 
-const {Client} = require("@ghasemkiani/etherscan-api/client");
+import {Client} from "./client.js";
 
-module.exports = {Client};
+export {Client};
