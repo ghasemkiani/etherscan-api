@@ -9,8 +9,8 @@ import {Obj} from "@ghasemkiani/base";
 
 class Client extends Obj {
 	get apiKeyToken() {
-		if(!this._apiKeyToken) {
-			if(this.apiKeyTokenEnvName) {
+		if (!this._apiKeyToken) {
+			if (this.apiKeyTokenEnvName) {
 				this._apiKeyToken = process.env[this.apiKeyTokenEnvName];
 			}
 		}
@@ -22,7 +22,7 @@ class Client extends Obj {
 	// singleton
 	static _cache = null;
 	get cache() {
-		if(!this.constructor._cache) {
+		if (!this.constructor._cache) {
 			this.constructor._cache = new Cache(this.cacheName);
 		}
 		return this.constructor._cache;
@@ -54,13 +54,34 @@ class Client extends Obj {
 		return json;
 	}
 	get addedAbisMap() {
-		if(!this._addedAbisMap) {
+		if (!this._addedAbisMap) {
 			this._addedAbisMap = {};
 		}
 		return this._addedAbisMap;
 	}
 	set addedAbisMap(addedAbisMap) {
 		this._addedAbisMap = addedAbisMap;
+	}
+	async toDecodeTx(tx) {
+		let {input} = tx;
+		if (input !== "0x") {
+			try {
+				let {to: address} = tx;
+				if (!this.addedAbisMap[address]) {
+					let abi = await this.toGetContractAbi(address);
+					abiDecoder.addABI(abi);
+					this.addedAbisMap[address] = true;
+				}
+				tx.decodedData = abiDecoder.decodeMethod(tx.input);
+				let params = tx.decodedData.params;
+				tx.decodedData.paramsObj = params.reduce(((obj, {name, value}) => ((obj[name] = value), obj)), {});
+			} catch(e) {
+				if (logErrors) {
+					console.log(`${e.message}\n${JSON.stringify(tx)}`);
+				}
+			}
+		}
+		return tx;
 	}
 	async toListTxs(arg) {
 		arg = Object.assign({
@@ -74,30 +95,13 @@ class Client extends Obj {
 		}, arg);
 		let {address, startblock, endblock, sort, decode, toProcessTx, logErrors} = arg;
 		let {status, message, result: txs} = await this.toListTransactions(address, startblock, endblock, sort);
-		if(!status) {
+		if (!status) {
 			throw new Error(message);
 		}
-		if(decode) {
-			for(let tx of txs) {
-				let {input} = tx;
-				if(input !== "0x") {
-					try {
-						let {to: address} = tx;
-						if(!this.addedAbisMap[address]) {
-							let abi = await this.toGetContractAbi(address);
-							abiDecoder.addABI(abi);
-							this.addedAbisMap[address] = true;
-						}
-						tx.decodedData = abiDecoder.decodeMethod(tx.input);
-						let params = tx.decodedData.params;
-						tx.decodedData.paramsObj = params.reduce(((obj, {name, value}) => ((obj[name] = value), obj)), {});
-					} catch(e) {
-						if(logErrors) {
-							console.log(`${e.message}\n${JSON.stringify(tx)}`);
-						}
-					}
-				}
-				if(toProcessTx) {
+		if (decode) {
+			for (let tx of txs) {
+				tx = await this.toDecodeTx(tx);
+				if (toProcessTx) {
 					await toProcessTx(tx);
 				}
 			}
@@ -111,17 +115,17 @@ class Client extends Obj {
 		let sabi = null;
 		let saveCache = false;
 		let key = this.getCacheKey(address);
-		if(this.useCache) {
+		if (this.useCache) {
 			try {
 				let cacheEntry = await this.cache.get(key);
-				if(cacheEntry && cacheEntry.isCached && cacheEntry.value) {
+				if (cacheEntry && cacheEntry.isCached && cacheEntry.value) {
 					sabi = cacheEntry.value;
 				} else {
 					saveCache = true;
 				}
 			} catch(e) {}
 		}
-		if(!sabi) {
+		if (!sabi) {
 			let json = await this.toGet("contract", "getabi", {address});
 			sabi = json.result;
 		}
@@ -135,7 +139,7 @@ class Client extends Obj {
 			}
 			throw e;
 		}
-		if(saveCache) {
+		if (saveCache) {
 			await this.cache.set(key, sabi);
 		}
 		return abi;
