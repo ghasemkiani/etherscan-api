@@ -166,6 +166,7 @@ cutil.extend(Client.prototype, {
 	cacheName: "etherscan",
 	// _cache: null,
 	_addedAbisMap: null,
+	logErrors: true,
 });
 
 export {Client};
