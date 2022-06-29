@@ -76,7 +76,7 @@ class Client extends Obj {
 				let params = tx.decodedData.params;
 				tx.decodedData.paramsObj = params.reduce(((obj, {name, value}) => ((obj[name] = value), obj)), {});
 			} catch(e) {
-				if (logErrors) {
+				if (this.logErrors) {
 					console.log(`${e.message}\n${JSON.stringify(tx)}`);
 				}
 			}
