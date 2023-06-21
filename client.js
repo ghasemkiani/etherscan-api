@@ -62,6 +62,12 @@ class Client extends Obj {
 	set addedAbisMap(addedAbisMap) {
 		this._addedAbisMap = addedAbisMap;
 	}
+	addAbi(abi, address) {
+		abiDecoder.addABI(abi);
+		if (address) {
+			this.addedAbisMap[address] = true;
+		}
+	}
 	async toDecodeTx(tx) {
 		let {input} = tx;
 		if (input !== "0x") {
@@ -73,8 +79,10 @@ class Client extends Obj {
 					this.addedAbisMap[address] = true;
 				}
 				tx.decodedData = abiDecoder.decodeMethod(tx.input);
-				let params = tx.decodedData.params;
-				tx.decodedData.paramsObj = params.reduce(((obj, {name, value}) => ((obj[name] = value), obj)), {});
+				if (tx.decodedData) {
+					let params = tx.decodedData.params;
+					tx.decodedData.paramsObj = params.reduce(((obj, {name, value}) => ((obj[name] = value), obj)), {});
+				}
 			} catch(e) {
 				if (this.logErrors) {
 					console.log(`${e.message}\n${JSON.stringify(tx)}`);
