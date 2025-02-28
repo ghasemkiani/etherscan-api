@@ -5,6 +5,18 @@ import { cutil } from "@ghasemkiani/base";
 import { Obj } from "@ghasemkiani/base";
 
 class Client extends Obj {
+  static {
+    cutil.extend(this.prototype, {
+      endpoint: "https://api.etherscan.io/api",
+      apiKeyTokenEnvName: "ETHERSCAN_APIKEY_TOKEN",
+      _apiKeyToken: null,
+      useCache: true,
+      cacheName: "etherscan",
+      // _cache: null,
+      _addedAbisMap: null,
+      logErrors: false,
+    });
+  }
   get apiKeyToken() {
     if (!this._apiKeyToken) {
       if (this.apiKeyTokenEnvName) {
@@ -203,16 +215,6 @@ class Client extends Obj {
     return result;
   }
 }
-cutil.extend(Client.prototype, {
-  endpoint: "https://api.etherscan.io/api",
-  apiKeyTokenEnvName: "ETHERSCAN_APIKEY_TOKEN",
-  _apiKeyToken: null,
-  useCache: true,
-  cacheName: "etherscan",
-  // _cache: null,
-  _addedAbisMap: null,
-  logErrors: true,
-});
 
 export { Client };
 
