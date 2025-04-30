@@ -7,12 +7,12 @@ import { Obj } from "@ghasemkiani/base";
 class Client extends Obj {
   static {
     cutil.extend(this.prototype, {
+      chainId: 1,
       endpoint: "https://api.etherscan.io/api",
       apiKeyTokenEnvName: "ETHERSCAN_APIKEY_TOKEN",
       _apiKeyToken: null,
       useCache: true,
-      cacheName: "etherscan",
-      // _cache: null,
+      cacheName: "eth",
       _addedAbisMap: null,
       logErrors: false,
     });
@@ -28,16 +28,18 @@ class Client extends Obj {
   set apiKeyToken(apiKeyToken) {
     this._apiKeyToken = apiKeyToken;
   }
-  // singleton
-  static _cache = null;
+  // singleton for each chain
+  static caches = {};
   get cache() {
-    if (!this.constructor._cache) {
-      this.constructor._cache = new Cache(this.cacheName);
+    const { cacheName } = this;
+    if (cutil.na(caches[cacheName])) {
+      caches[cacheName] = new Cache(cacheName);
     }
-    return this.constructor._cache;
+    return caches[cacheName];
   }
   set cache(cache) {
-    this.constructor._cache = null;
+    const { cacheName } = this;
+    caches[cacheName] = cache;
   }
   async toFetch(module, action, params) {
     params = Object(params);
@@ -219,3 +221,4 @@ class Client extends Obj {
 export { Client };
 
 // https://api.etherscan.io/apis
+// https://docs.etherscan.io/etherscan-v2/v2-quickstart
