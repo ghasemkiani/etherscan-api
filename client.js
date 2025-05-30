@@ -41,7 +41,7 @@ class Client extends Obj {
     const { cacheName } = this;
     caches[cacheName] = cache;
   }
-  async toFetch(module, action, params) {
+  async toFetchV1(module, action, params) {
     params = Object(params);
     params.module = module;
     params.action = action;
@@ -50,6 +50,19 @@ class Client extends Obj {
       .map((bi) => bi.map((s) => encodeURIComponent(s)).join("="))
       .join("&");
     let url = `${this.endpoint}?${query}`;
+    let rsp = await fetch(url);
+    return rsp;
+  }
+  async toFetch(module, action, params) {
+    params = Object(params);
+    params.chainId = this.chainId;
+    params.module = module;
+    params.action = action;
+    params.apikey = this.apiKeyToken;
+    let query = Object.entries(params)
+      .map((bi) => bi.map((s) => encodeURIComponent(s)).join("="))
+      .join("&");
+    let url = `${this.endpoint.replace(/\/api$/, "/v2/api")}?${query}`;
     let rsp = await fetch(url);
     return rsp;
   }
@@ -62,7 +75,7 @@ class Client extends Obj {
     address,
     startblock = 0,
     endblock = 999999999,
-    sort = "desc"
+    sort = "desc",
   ) {
     let json = await this.toGet("account", "txlist", {
       address,
@@ -76,7 +89,7 @@ class Client extends Obj {
     address,
     startblock = 0,
     endblock = 999999999,
-    sort = "desc"
+    sort = "desc",
   ) {
     let json = await this.toGet("account", "txlistinternal", {
       address,
@@ -116,7 +129,7 @@ class Client extends Obj {
           let params = tx.decodedData.params;
           tx.decodedData.paramsObj = params.reduce(
             (obj, { name, value }) => ((obj[name] = value), obj),
-            {}
+            {},
           );
         }
       } catch (e) {
@@ -138,7 +151,7 @@ class Client extends Obj {
         toProcessTx: null,
         logErrors: false,
       },
-      arg
+      arg,
     );
     let {
       address,

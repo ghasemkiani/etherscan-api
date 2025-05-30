@@ -1,37 +1,34 @@
 {
-	"name": "@ghasemkiani/etherscan-api",
-	"version": "2.1.7",
-	"description": "An API client for etherscan.io",
-	"type": "module",
-	"main": "index.js",
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
-		"format": "prettier --write .",
-		"lint": "eslint .",
-		"lint:fix": "eslint --fix ."
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/ghasemkiani/etherscan-api.git"
-	},
-	"keywords": [
-		"javascript",
-		"nodejs",
-		"blockchain",
-		"cryptocurrency",
-		"ethereum",
-		"etherscan",
-		"api"
-	],
-	"author": "Ghasem Kiani",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/ghasemkiani/etherscan-api/issues"
-	},
-	"homepage": "https://github.com/ghasemkiani/etherscan-api#readme",
-	"dependencies": {
-		"@ghasemkiani/base": "github:ghasemkiani/base",
-		"abi-decoder": "^2.4.0",
-		"async-disk-cache": "^2.1.0"
-	}
+  "name": "@ghasemkiani/etherscan-api",
+  "version": "2.1.8",
+  "description": "An API client for etherscan.io",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ghasemkiani/etherscan-api.git"
+  },
+  "keywords": [
+    "javascript",
+    "nodejs",
+    "blockchain",
+    "cryptocurrency",
+    "ethereum",
+    "etherscan",
+    "api"
+  ],
+  "author": "Ghasem Kiani",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ghasemkiani/etherscan-api/issues"
+  },
+  "homepage": "https://github.com/ghasemkiani/etherscan-api#readme",
+  "dependencies": {
+    "@ghasemkiani/base": "github:ghasemkiani/base",
+    "abi-decoder": "^2.4.0",
+    "async-disk-cache": "^2.1.0"
+  }
 }
