@@ -112,15 +112,17 @@ class Client extends Obj {
     page = 1,
     offset = 100,
   }) {
-    let json = await this.toGet("account", "tokentx", {
+    let options = {
       address,
       startblock,
       endblock,
       sort,
-      contractaddress,
+      ...(cutil.a(contractaddress) ? {contractaddress} : {}),
       page,
       offset,
-    });
+    };
+    console.log(options);
+    let json = await this.toGet("account", "tokentx", options);
     return json;
   }
   get addedAbisMap() {
