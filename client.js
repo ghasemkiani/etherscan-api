@@ -6,6 +6,9 @@ import { Obj } from "@ghasemkiani/base";
 
 class Client extends Obj {
   static {
+    cutil.extend(this, {
+      caches: {},
+    });
     cutil.extend(this.prototype, {
       chainId: 1,
       endpoint: "https://api.etherscan.io/api",
@@ -29,8 +32,8 @@ class Client extends Obj {
     this._apiKeyToken = apiKeyToken;
   }
   // singleton for each chain
-  static caches = {};
   get cache() {
+    const { caches } = this.constructor;
     const { cacheName } = this;
     if (cutil.na(caches[cacheName])) {
       caches[cacheName] = new Cache(cacheName);
@@ -38,6 +41,7 @@ class Client extends Obj {
     return caches[cacheName];
   }
   set cache(cache) {
+    const { caches } = this.constructor;
     const { cacheName } = this;
     caches[cacheName] = cache;
   }
@@ -96,6 +100,26 @@ class Client extends Obj {
       startblock,
       endblock,
       sort,
+    });
+    return json;
+  }
+  async toListTokenTransactions({
+    address,
+    startblock = 0,
+    endblock = 999999999,
+    sort = "desc",
+    contractaddress,
+    page = 1,
+    offset = 100,
+  }) {
+    let json = await this.toGet("account", "tokentx", {
+      address,
+      startblock,
+      endblock,
+      sort,
+      contractaddress,
+      page,
+      offset,
     });
     return json;
   }
@@ -195,7 +219,11 @@ class Client extends Obj {
         } else {
           saveCache = true;
         }
-      } catch (e) {}
+      } catch (e) {
+        if (logError) {
+          console.log(e);
+        }
+      }
     }
     if (!sabi) {
       let json = await this.toGet("contract", "getabi", { address });
