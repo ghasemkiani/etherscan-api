@@ -1,6 +1,6 @@
 {
   "name": "@ghasemkiani/etherscan-api",
-  "version": "2.1.10",
+  "version": "2.1.11",
   "description": "An API client for etherscan.io",
   "type": "module",
   "main": "index.js",
