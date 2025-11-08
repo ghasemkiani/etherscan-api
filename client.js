@@ -89,7 +89,7 @@ class Client extends Obj {
   }
   async toPost(module, action, body) {
     let url = this.getUrl(module, action);
-    let rsp =  = await fetch(url, {
+    let rsp = await fetch(url, {
       method: "POST",
       body,
     });
@@ -285,7 +285,7 @@ class Client extends Obj {
     contractName,
     compilerVersion,
     constructorArguments,
-  } {
+  }) {
     let module = "contract";
     let action = "verifysourcecode";
     let body = {
