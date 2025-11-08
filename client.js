@@ -57,6 +57,18 @@ class Client extends Obj {
     let rsp = await fetch(url);
     return rsp;
   }
+  async getUrl(module, action, params) {
+    params = Object(params);
+    params.chainId = this.chainId;
+    params.module = module;
+    params.action = action;
+    params.apikey = this.apiKeyToken;
+    let query = Object.entries(params)
+      .map((bi) => bi.map((s) => encodeURIComponent(s)).join("="))
+      .join("&");
+    let url = `${this.endpoint.replace(/\/api$/, "/v2/api")}?${query}`;
+    return url;
+  }
   async toFetch(module, action, params) {
     params = Object(params);
     params.chainId = this.chainId;
@@ -74,6 +86,14 @@ class Client extends Obj {
     let rsp = await this.toFetch(module, action, params);
     let json = await rsp.json();
     return json;
+  }
+  async toPost(module, action, body) {
+    let url = this.getUrl(module, action);
+    let rsp =  = await fetch(url, {
+      method: "POST",
+      body,
+    });
+    return await rsp.json();
   }
   async toListTransactions(
     address,
@@ -258,6 +278,25 @@ class Client extends Obj {
       result = true;
     } catch (e) {}
     return result;
+  }
+  async toVerify({
+    contractAddress,
+    compilerInput,
+    contractName,
+    compilerVersion,
+    constructorArguments,
+  } {
+    let module = "contract";
+    let action = "verifysourcecode";
+    let body = {
+      contractaddress: contractAddress,
+      sourceCode: JSON.stringify(compilerInput),
+      codeformat: "solidity-standard-json-input",
+      contractname: contractName,
+      compilerversion: compilerVersion,
+      constructorArguments,
+    };
+    return this.toPost(module, action, body);
   }
 }
 
